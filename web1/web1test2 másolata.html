@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Rádió – Belépés / Regisztráció</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="background-overlay"></div>
+
+<div class="main-container">
+    <h2>Rádió – Belépés</h2>
+
+    <div class="tabs">
+        <button id="login-tab">Belépés</button>
+        <button id="register-tab">Regisztráció</button>
+    </div>
+
+    <!-- Belépés -->
+    <div id="login-form" class="form-box">
+        <h3>Belépés</h3>
+        <div class="input-group">
+            <input type="email" id="login-email" placeholder="E-mail cím">
+        </div>
+        <div class="input-group">
+            <input type="password" id="login-password" placeholder="Jelszó">
+        </div>
+        <button id="login-btn" class="submit-btn">Belépés</button>
+        <p id="login-message" class="message"></p>
+    </div>
+
+    <!-- Regisztráció -->
+    <div id="register-form" class="form-box" style="display:none;">
+        <h3>Regisztráció</h3>
+        <div class="input-group">
+            <input type="text" id="reg-name" placeholder="Felhasználónév">
+        </div>
+        <div class="input-group">
+            <input type="email" id="reg-email" placeholder="E-mail cím">
+        </div>
+        <div class="input-group">
+            <input type="password" id="reg-password" placeholder="Jelszó">
+        </div>
+        <button id="register-btn" class="submit-btn">Fiók létrehozása</button>
+        <p id="register-message" class="message"></p>
+    </div>
+
+    <!-- Rádió oldal -->
+    <div id="radio-page" class="form-box" style="display:none;">
+        <h1>Élő Adás 🔴</h1>
+        <p>Jó szórakozást a rádióhoz!</p>
+
+        <!-- IDE ÍRD A SAJÁT RÁDIÓD STREAM URL-JÉT! (Most egy teszt rádió van benne) -->
+        <audio controls style="width: 100%; margin: 15px 0;">
+            <source src="http://stream.radiorecord.ru:8101/rr_128" type="audio/mpeg">
+            A böngésződ nem támogatja az audio elemet.
+        </audio>
+
+        <button id="logout-btn" class="submit-btn secondary">Kijelentkezés</button>
+    </div>
+</div>
+
+<script>
+// --- Felület váltás ---
+document.getElementById("login-tab").onclick = function() {
+    document.getElementById("login-form").style.display = "block";
+    document.getElementById("register-form").style.display = "none";
+    document.querySelector("h2").textContent = "Rádió – Belépés";
+};
+
+document.getElementById("register-tab").onclick = function() {
+    document.getElementById("register-form").style.display = "block";
+    document.getElementById("login-form").style.display = "none";
+    document.querySelector("h2").textContent = "Rádió – Regisztráció";
+};
+
+// --- ADATBÁZIS KAPCSOLAT ELŐKÉSZÍTÉSE (Backend felé) ---
+
+// Regisztráció küldése az adatbázisnak
+document.getElementById("register-btn").onclick = async function() {
+    const name = document.getElementById("reg-name").value.trim();
+    const email = document.getElementById("reg-email").value.trim();
+    const password = document.getElementById("reg-password").value;
+    const messageEl = document.getElementById("register-message");
+
+    if (!name || !email || !password) {
+        messageEl.textContent = "Minden mező kitöltése kötelező!";
+        return;
+    }
+
+    messageEl.textContent = "Regisztráció folyamatban...";
+
+    try {
+        /* VÁLTOZTATÁS: Ide jön a te backend fájlod (pl. register.php) 
+           amikor kész lesz az adatbázisod. Most csak szimuláljuk. */
+        
+        // let response = await fetch('register.php', {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify({ name: name, email: email, password: password })
+        // });
+        // let result = await response.json();
+        
+        // --- Ideiglenes szimuláció amíg nincs PHP-d: ---
+        setTimeout(() => {
+            messageEl.style.color = "#00ff00"; // Zöld üzenet
+            messageEl.textContent = "Sikeres regisztráció! Most már beléphetsz.";
+            // Elmentjük ideiglenesen a böngészőbe is a teszteléshez
+            localStorage.setItem("radioUser", JSON.stringify({ email, password, name }));
+        }, 1000);
+
+    } catch (error) {
+        messageEl.textContent = "Hiba történt a szerverrel való kommunikációban.";
+    }
+};
+
+// Belépés ellenőrzése az adatbázisban
+document.getElementById("login-btn").onclick = async function() {
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+    const messageEl = document.getElementById("login-message");
+
+    if (!email || !password) {
+        messageEl.textContent = "Írd be az e-mail címed és a jelszavad!";
+        return;
+    }
+
+    try {
+        /* VÁLTOZTATÁS: Ide jön a te backend fájlod (pl. login.php) ami lekérdezi a MySQL-t */
+        
+        // let response = await fetch('login.php', {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify({ email: email, password: password })
+        // });
+        // let result = await response.json();
+        // if(result.success) { showRadioPage(); } ...
+
+        // --- Ideiglenes szimuláció amíg nincs PHP-d: ---
+        const user = JSON.parse(localStorage.getItem("radioUser"));
+        if (user && email === user.email && password === user.password) {
+            messageEl.textContent = "";
+            showRadioPage();
+        } else {
+            messageEl.textContent = "Hibás e-mail vagy jelszó (vagy még nem regisztráltál).";
+        }
+
+    } catch (error) {
+        messageEl.textContent = "Hiba történt a bejelentkezés során.";
+    }
+};
+
+// Rádió oldal megjelenítése
+function showRadioPage() {
+    document.getElementById("login-form").style.display = "none";
+    document.getElementById("register-form").style.display = "none";
+    document.querySelector(".tabs").style.display = "none"; // Fülek elrejtése
+    document.querySelector("h2").style.display = "none";    // Főcím elrejtése
+    document.getElementById("radio-page").style.display = "block";
+}
+
+// Kijelentkezés
+document.getElementById("logout-btn").onclick = function() {
+    // Rádió megállítása kilépéskor
+    const audioPlayer = document.querySelector("audio");
+    audioPlayer.pause();
+    audioPlayer.currentTime = 0;
+
+    document.getElementById("radio-page").style.display = "none";
+    document.querySelector(".tabs").style.display = "block";
+    document.querySelector("h2").style.display = "block";
+    document.querySelector("h2").textContent = "Rádió – Belépés";
+    document.getElementById("login-form").style.display = "block";
+    
+    // Mezők ürítése
+    document.getElementById("login-email").value = "";
+    document.getElementById("login-password").value = "";
+    document.getElementById("login-message").textContent = "";
+};
+</script>
+
+</body>
+</html>
